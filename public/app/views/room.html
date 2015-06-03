@@ -1,0 +1,19 @@
+<div style="padding: 17px; padding-top: 0px;">
+  <span ng-bind="error"></span>
+</div>
+
+<div class="video-wrapper">
+  <video-player class="col-md-4" ng-repeat="peer in peers" vid-src="{{peer.stream}}"></video-player>
+</div>
+
+<div class="video-wrapper">
+  <div class="col-md-2">
+    <video ng-src="{{getLocalVideo()}}" autoplay muted></video>
+  </div>
+</div>
+
+<input type="text" ng-model="sendtext"/>
+<input type="button" ng-click="sendMessage(sendtext);" name="send message" title="send message"/>
+<input type="file" fileread="fileuploadname" />
+<div id="files"></div>
+
