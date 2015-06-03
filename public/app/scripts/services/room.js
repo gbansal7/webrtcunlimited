@@ -133,14 +133,32 @@ angular.module('publicApp')
       pc.ondatachannel = function(){
           remoteDataChannel = event.channel;
           remoteDataChannel.onmessage = function(event) {
-            console.log(event.data);
-           receiveBuffer.push(event.data);
+            console.log("Got Data Channel Message:", event.data);
+          if(typeof event.data == "string"){
+            var mydata = event.data;
+            mydata = JSON.parse(mydata);
+            if(mydata.type == "file"){
+              filesize = mydata.size;
+              filename = mydata.name;
+            }else{
+              alert(mydata.msg);
+            }
+           // console.log(mydata);
+          }else{
+              receiveBuffer.push(event.data);
+            //receivedSize += event.data.byteLength;
+            
+            console.log("file size", filesize);
+            console.log("filename", filename);
+            
+
             if(isNaN(receivedSize)){
               receivedSize=0;
             }
             var currentreceviedSize =  event.data.byteLength;
             receivedSize = receivedSize+parseInt(currentreceviedSize);
             console.log("currentreceviedSize",currentreceviedSize);
+            console.log("receivedSize", receivedSize);
             if (receivedSize === filesize) { //filesize 549841
               var received = new window.Blob(receiveBuffer);
               receiveBuffer = [];
@@ -154,6 +172,7 @@ angular.module('publicApp')
               receivedSize=0;
               //alert("complete in loca");
             }
+          }
           };
 
           dataChannel[data.by]= remoteDataChannel;
