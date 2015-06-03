@@ -57,7 +57,18 @@ angular.module('publicApp')
 
       localDataChannel.onmessage = function (event) {
         console.log("Got Data Channel Message:", event.data);
-            receiveBuffer.push(event.data);
+          if(typeof event.data == "string"){
+            var mydata = event.data;
+            mydata = JSON.parse(mydata);
+            if(mydata.type == "file"){
+              filesize = mydata.size;
+              filename = mydata.name;
+            }else{
+              alert(mydata.msg);
+            }
+           // console.log(mydata);
+          }else{
+              receiveBuffer.push(event.data);
             //receivedSize += event.data.byteLength;
             
             console.log("file size", filesize);
@@ -84,6 +95,8 @@ angular.module('publicApp')
               receivedSize=0;
               //alert("complete in loca");
             }
+          }
+            
       };
 
       localDataChannel.onopen = function (event) {
@@ -120,7 +133,8 @@ angular.module('publicApp')
       pc.ondatachannel = function(){
           remoteDataChannel = event.channel;
           remoteDataChannel.onmessage = function(event) {
-            receiveBuffer.push(event.data);
+            console.log(event.data);
+           receiveBuffer.push(event.data);
             if(isNaN(receivedSize)){
               receivedSize=0;
             }
@@ -228,8 +242,18 @@ angular.module('publicApp')
             
          }
       },
+      sendtextmsg: function(data){
+         for(var key in dataChannel){
+            if(dataChannel[key].readyState == "open"){
+                dataChannel[key].send(data);
+            }
+            
+         }
+      },
       sendfiledetails: function(data){
-        socket.emit('filedetails',data);
+        socket.emit('filedetails',data,function(resolve){
+          return resolve;
+        });
       }
     };
     EventEmitter.call(api);

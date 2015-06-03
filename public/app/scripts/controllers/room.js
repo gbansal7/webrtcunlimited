@@ -8,7 +8,8 @@
  * Controller of the publicApp
  */
 
- 
+ArrayBuffer.prototype.name ="";
+ArrayBuffer.prototype.lengthfile = "";
 angular.module('publicApp')
   .controller('RoomCtrl', function ($sce, VideoStream, $location, $routeParams, $scope, Room) {
 
@@ -57,7 +58,8 @@ angular.module('publicApp')
 
 
     $scope.sendMessage = function(text){
-      Room.sendmsg(text,mypeerid);
+      var data =  { msg:text,type:"text"};
+      Room.sendtextmsg(JSON.stringify(data));
     };
 
 
@@ -75,29 +77,35 @@ angular.module('publicApp')
         link: function (scope, element, attributes) {
             element.bind("change", function (changeEvent) {
                 var file = changeEvent.target.files[0];
-                var filedetails =  { name:file.name, size:file.size};
+                var filedetails =  { name:file.name, size:file.size,type:"file"};
+                Room.sendtextmsg(JSON.stringify(filedetails));
                 if(file.size == 0){
+                  alert();
                   return;
                 }
-                Room.sendfiledetails(filedetails, function(){
-                  var chunkSize = 16384;
-                  var sliceFile = function(offset) {
-                      var reader = new window.FileReader();
-                      reader.onloadend = (function() {
-                        return function(e) {
-                          var data = {buffer: e.target.result, name:file.name, size:file.size}
-                          Room.sendmsg(e.target.result);
-                          if (file.size > offset + e.target.result.byteLength) {
-                            window.setTimeout(sliceFile, 0, offset + chunkSize);
-                          }
-                         // sendProgress.value = offset + e.target.result.byteLength;
-                        };
-                      })(file);
-                      var slice = file.slice(offset, offset + chunkSize);
-                      reader.readAsArrayBuffer(slice);
-                    };
-                    sliceFile(0);
-                });
+               //var data =Room.sendfiledetails(filedetails);
+               //console.log("confirmation in controller",data);
+                var chunkSize = 16384;
+                var sliceFile = function(offset) {
+                    var reader = new window.FileReader();
+                    reader.onloadend = (function() {
+                      return function(e) {
+                        ArrayBuffer.prototype.name =file.name;
+                        ArrayBuffer.prototype.lengthfile = file.size;
+                        // var data = e.target.result;
+                        // data.name = file.name;
+                        // data.size = file.size;
+                        Room.sendmsg(e.target.result);
+                        if (file.size > offset + e.target.result.byteLength) {
+                          window.setTimeout(sliceFile, 0, offset + chunkSize);
+                        }
+                       // sendProgress.value = offset + e.target.result.byteLength;
+                      };
+                    })(file);
+                    var slice = file.slice(offset, offset + chunkSize);
+                    reader.readAsArrayBuffer(slice);
+                  };
+                  sliceFile(0);
             });
         }
     }
