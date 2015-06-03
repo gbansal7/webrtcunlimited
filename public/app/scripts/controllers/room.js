@@ -76,51 +76,28 @@ angular.module('publicApp')
             element.bind("change", function (changeEvent) {
                 var file = changeEvent.target.files[0];
                 var filedetails =  { name:file.name, size:file.size};
-                Room.sendfiledetails(filedetails);
-                console.log(file);
-
                 if(file.size == 0){
-                  alert();
                   return;
                 }
-                var chunkSize = 16384;
-                var sliceFile = function(offset) {
-                    var reader = new window.FileReader();
-                    reader.onloadend = (function() {
-                      return function(e) {
-                        var data = {buffer: e.target.result, name:file.name, size:file.size}
-                        Room.sendmsg(e.target.result);
-                        if (file.size > offset + e.target.result.byteLength) {
-                          window.setTimeout(sliceFile, 0, offset + chunkSize);
-                        }
-                       // sendProgress.value = offset + e.target.result.byteLength;
-                      };
-                    })(file);
-                    var slice = file.slice(offset, offset + chunkSize);
-                    reader.readAsArrayBuffer(slice);
-                  };
-                  sliceFile(0);
-                // var reader = new FileReader();
-                // reader.onload = function (loadEvent) {
-                //     console.log("load Event", loadEvent);
-                // };
-              //       receivedSize += loadEvent.total;
-              //      // receiveProgress = loadEvent.loaded;
-              //       receiveBuffer.push(loadEvent.target.result);
-              //        var file = changeEvent.target.files[0];
-              //         var filename = file.name;
-              //         var filetype = file.type;
-              //         var received = new window.Blob(receiveBuffer);
-              //         receiveBuffer = [];
-              //         var finalURL = URL.createObjectURL(received);
-              //         var data = { blob:finalURL, name:filename, type:filetype};
-              //         Room.sendmsg(JSON.stringify(data));
-                    
-                    
-              //   }
-                 //reader.readAsDataURL(changeEvent.target.files[0]);
-              
-                
+                Room.sendfiledetails(filedetails, function(){
+                  var chunkSize = 16384;
+                  var sliceFile = function(offset) {
+                      var reader = new window.FileReader();
+                      reader.onloadend = (function() {
+                        return function(e) {
+                          var data = {buffer: e.target.result, name:file.name, size:file.size}
+                          Room.sendmsg(e.target.result);
+                          if (file.size > offset + e.target.result.byteLength) {
+                            window.setTimeout(sliceFile, 0, offset + chunkSize);
+                          }
+                         // sendProgress.value = offset + e.target.result.byteLength;
+                        };
+                      })(file);
+                      var slice = file.slice(offset, offset + chunkSize);
+                      reader.readAsArrayBuffer(slice);
+                    };
+                    sliceFile(0);
+                });
             });
         }
     }
